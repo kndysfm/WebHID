@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>RESTful API demo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style type="text/css">
+    * {
+      outline: none;
+    }
+
+    body {
+      background-color: #789;
+      margin: 0;
+      padding: 0;
+      font: 16px/1.4 Helvetica, Arial, sans-serif;
+      font: 16px/1.4 Helvetica, Arial, sans-serif;
+    }
+
+    div.content {
+      width: 800px;
+      margin: 2em auto;
+      padding: 20px 50px;
+      background-color: #fff;
+      border-radius: 1em;
+    }
+
+    label {
+      display: inline-block;
+      min-width: 7em;
+    }
+
+    input {
+      border: 1px solid #ccc;
+      padding: 0.2em;
+    }
+
+    a:link, a:visited {
+      color: #69c;
+      text-decoration: none;
+    }
+
+    @media (max-width: 700px) {
+      body {
+        background-color: #fff;
+      }
+
+      div.content {
+        width: auto;
+        margin: 0 auto;
+        padding: 1em;
+      }
+    }
+
+    #messages {
+      border: 2px solid #fec;
+      border-radius: 1em;
+      height: 10em;
+      overflow: scroll;
+      padding: 0.5em 1em;
+    }
+  </style>
+
+  <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
+  <script language="javascript" type="text/javascript">
+    jQuery(function () {
+    });
+
+    var hid = {
+      'enumerate': function (handler, vid, pid) {
+        if (typeof vid !== 'number') vid = 0x0000;
+        if (typeof pid !== 'number') pid = 0x0000;
+
+        var req = new XMLHttpRequest();
+        req.open('POST', '/hid/enumerate');
+        req.responseType = 'text';
+        req.onload = function (evt) {
+          var json = JSON.parse(req.response);
+          handler(json);
+        };
+        req.send('vid=' + vid + '&pid=' + pid);
+      },
+      'getFeature': function (path, handler, rid) {
+        if (typeof rid !== 'number') return;
+
+        var req = new XMLHttpRequest();
+        req.open('GET', path + 'feature/' + rid);
+        req.responseType = 'arraybuffer';
+        req.onload = function (evt) {
+          var data = new Uint8Array(req.response);
+          handler(data);
+        };
+        req.send(null);
+      },
+      'setFeature': function (path, rid, values) {
+        if (typeof rid !== 'number') return;
+
+        var size = values.length + 1;
+        var buf = new ArrayBuffer(size);
+        var byte_array = new Uint8Array(buf);
+        byte_array[0] = rid;
+        for (var i = 0; i < byte_array.length; i++) {
+          byte_array[i + 1] = values[i] & 0xff;
+        }
+
+        var req = new XMLHttpRequest();
+        req.open('POST', path + 'feature/' + rid);
+        req.send(buf);
+      }
+    }
+    
+    var foundPath = '';
+    var enumerateHid = function () {
+      var json_handler = function (json) {
+        for (var i = 0; i < json.count; i++) {
+          var d = json.devices[i];
+          if (d.vendorId === 0x056a && // wacom
+              d.usagePage === 0xff11 && // vendor-defined
+              d.usage === 0x0002) { // 
+            foundPath = d.virtualPath;
+            $('#result').html(foundPath);
+            return;
+          }
+        }
+        foundPath = '';
+      };
+      // search only wacom device
+      hid.enumerate(json_handler, 0x056a, 0x0000);
+    };
+    
+    var getFeatureHid = function () {
+      var feature_handler = function (data) {
+        var str = '';
+        for (var i = 0; i < data.byteLength; i++) {
+          str += data[i].toString(16) + ' ';
+        }
+        $('#result').html(str);
+      };
+
+      hid.getFeature(foundPath, feature_handler, 0x0B);
+    };
+
+    var setFeatureHid = function () {
+      hid.setFeature(foundPath, 0x0B, [0x01, 0x00]);
+    };
+
+    var _ws;
+    var openInputHid = function () {
+      _ws = new WebSocket('ws://' + location.host + foundPath);
+      var ws = _ws;
+
+      if (!window.console) { window.console = { log: function () { } } };
+
+      ws.binaryType = "arraybuffer";
+      ws.onopen = function (ev) {
+        console.log(ev); ws.send('open');  // send something to get first packet
+      };
+      ws.onerror = function (ev) { console.log(ev); };
+      ws.onclose = function (ev) { console.log(ev); };
+
+      var show_message = function (bytearray) {
+        var str = '';
+        for (var i = 0; i < bytearray.byteLength; ) {
+          var sz_pkt = bytearray[i] | (bytearray[i + 1] << 8) | (bytearray[i + 2] << 16) | (bytearray[i + 3] << 24);
+          i += 4;
+          if (sz_pkt > 0) {
+            for (var j = 0; i < bytearray.byteLength && j < sz_pkt; i++, j++) {
+              var b = bytearray[i];
+              str += ((b < 16) ? '0' : '') + b.toString(16) + ' ';
+            }
+            str += '(' + sz_pkt + ')<br />';
+          }
+        }
+
+        var div = document.createElement('div');
+        div.innerHTML = str;
+        var elem = document.getElementById('messages');
+        elem.scrollTop = elem.scrollHeight;
+        elem.appendChild(div);
+        ws.send('continue'); // send something to get next packet
+      };
+        
+      ws.onmessage = function (ev) {
+        var fileReader = new FileReader();
+        fileReader.onload = function () {
+          var bytearray = new Uint8Array(this.result);
+          show_message(bytearray);
+        };
+        if (event.data instanceof ArrayBuffer) {
+          var bytearray = new Uint8Array(event.data);
+          show_message(bytearray);
+        } else if (event.data instanceof Blob){
+          fileReader.readAsArrayBuffer(ev.data);
+        }
+      };
+    };
+    var closeInputHid = function () {
+        if (_ws) _ws.close();
+    };
+
+  </script>
+</head>
+<body>
+  <div class="content">
+    <h1>WebHID demo.</h1>
+
+    <p>
+      This page demonstrates how Web client could access to (remote) HID.
+    </p>
+
+    <div>
+      <label>Result:</label>
+      <span id="result">&nbsp;</span>
+    </div>
+    <div>
+        <button onclick="enumerateHid();"> Enumerate </button>
+        Enumerate HID(s) as JSON data </div>
+    <div>
+        <button onclick="getFeatureHid();"> GetFeature </button>
+        Try to get Feature Report ID = 0x0B </div>
+    <div>
+        <button onclick="setFeatureHid();"> SetFeature </button>
+        Try to set Feature Report ID = 0x0B value 0x01</div>
+    <div> 
+        <button onclick="openInputHid();"> Open </button>
+        Start WebSocket communication; read Input Report continuously </div>
+    <div> 
+        <button onclick="closeInputHid();"> Close </button>
+        Close WebSocket connection </div>
+
+
+      <div id="messages">
+      </div>
+
+    </div>
+</body>
+</html>

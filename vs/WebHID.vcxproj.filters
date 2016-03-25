@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
+    </Filter>
+    <Filter Include="Source Files\hidapi">
+      <UniqueIdentifier>{e025af15-c4cd-45f3-bbb0-56dbeef56a48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\mongoose">
+      <UniqueIdentifier>{435daeca-36c5-483e-bcfd-0c32b2de3130}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\hidapi">
+      <UniqueIdentifier>{744f0e70-3e44-4b30-9e90-886f6d3a8baf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\mongoose">
+      <UniqueIdentifier>{f4608317-01af-4d87-8fc8-58e15f7c73ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\pthreads4w">
+      <UniqueIdentifier>{1b65574e-a11c-49a8-9ede-4c596c3915ea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\pthreads4w">
+      <UniqueIdentifier>{236f972f-389b-4d5d-b136-698baa6d3931}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\bdl_list.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\vl_queue.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\webhid.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\mongoose\mongoose.c">
+      <Filter>Source Files\mongoose</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\hidapi\windows\hid.c">
+      <Filter>Source Files\hidapi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\lib\pthreads4w\pthread.c">
+      <Filter>Source Files\pthreads4w</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\src\bdl_list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\vl_queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\webhid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\pthreads4w\pthread.h">
+      <Filter>Header Files\pthreads4w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\pthreads4w\semaphore.h">
+      <Filter>Header Files\pthreads4w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\pthreads4w\implement.h">
+      <Filter>Header Files\pthreads4w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\pthreads4w\sched.h">
+      <Filter>Header Files\pthreads4w</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\hidapi\hidapi\hidapi.h">
+      <Filter>Header Files\hidapi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\lib\mongoose\mongoose.h">
+      <Filter>Header Files\mongoose</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
