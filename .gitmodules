@@ -1,0 +1,9 @@
+[submodule "hidapi"]
+	path = lib/hidapi
+	url = https://github.com/signal11/hidapi.git
+[submodule "mongoose"]
+	path = lib/mongoose
+	url = https://github.com/cesanta/mongoose.git
+[submodule "pthreads4w"]
+	path = lib/pthreads4w
+	url = http://git.code.sf.net/p/pthreads4w/code
